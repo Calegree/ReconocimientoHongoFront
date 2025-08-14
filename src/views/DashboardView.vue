@@ -1,0 +1,14 @@
+<script setup>
+// Lógica del componente
+import NavBar from '../components/NavBar.vue'
+</script>
+
+<template>
+  <!-- HTML del componente -->
+  <NavBar />
+  <h1>Dashboard</h1>
+</template>
+
+<style scoped>
+/* Estilos del componente */
+</style>

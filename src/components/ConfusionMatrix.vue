@@ -1,15 +1,10 @@
 <script setup>
 // Lógica del componente
-import Title from '../components/Title.vue'
-import NavBar from '../components/NavBar.vue'
 </script>
 
 <template>
   <!-- HTML del componente -->
-  <Title />
-  <h1>Model Training</h1>
-
-  <NavBar />
+  <p>Matriz de confusión</p>
 </template>
 
 <style scoped>

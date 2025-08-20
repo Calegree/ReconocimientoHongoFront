@@ -3,6 +3,7 @@
 import Title from '../components/Title.vue'
 import NavBar from '../components/NavBar.vue'
 import TextBox from '@/components/TextBox.vue'
+import ConfusionMatrix from '@/components/ConfusionMatrix.vue'
 import { Activity, TrendingUp, Target } from 'lucide-vue-next'
 
 // Datos dinámicos
@@ -28,7 +29,7 @@ const metricas = [
 <template>
   <!-- HTML del componente -->
   <Title />
-  <div class="flex flex-row">
+  <div class="flex flex-col md:flex-row">
     <TextBox
       v-for="metrica in metricas"
       :key="metrica.title"
@@ -36,6 +37,9 @@ const metricas = [
       :icon="metrica.icon"
       :percentage="metrica.percentage"
     />
+  </div>
+  <div class="">
+    <ConfusionMatrix />
   </div>
 
   <NavBar />

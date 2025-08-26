@@ -29,7 +29,3 @@ const props = defineProps({
     <p class="text-3xl font-bold">{{ percentage }}</p>
   </div>
 </template>
-
-<style scoped>
-/* Estilos del componente */
-</style>

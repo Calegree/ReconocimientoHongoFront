@@ -135,19 +135,140 @@ const analyzeImage = async () => {
   //avisa que esta analizando
   isAnalyzing.value = true
 
-  //conecta con la api de reconocimiento y obtiene un json con
-  //nombre del hongo (clase donde se encasilla a la foto)
-  //porcentaje de confianza con que se identificó
+  try {
+    console.log('🔍 === INICIO analyzeImage ===')
+    
+    // Convertir la imagen a base64
+    const base64Image = await convertImageToBase64(selectedImage.value)
+    console.log('📷 Imagen convertida a base64')
 
-  //simulacion de prueba da un json con morchella y 71.9 confianza
-  //tiene 2000 para ver que onda los spinners
-  setTimeout(() => {
-    analysisResult.value = {
-      name: 'Morchella',
-      confidence: 'Confianza: 71.9%',
+    // Preparar la petición a la API de Kindwise Mushroom
+    const apiUrl = 'https://mushroom.kindwise.com/api/v1/identification'
+    const apiKey = 'xlJWL63eR46Y1K4X21RUUuNAIK8VbNHnzyD1Kd47ee8ONax3p6'
+
+    const requestBody = {
+      images: [base64Image],
+     latitude: 0,
+                        longitude: 0,
+                        similar_images: true
     }
+
+    console.log('🚀 Enviando petición a la API de Mushroom Identification...')
+    console.log('📋 Request body:', requestBody)
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Api-Key': apiKey
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ Error de API:', response.status, response.statusText, errorText)
+      throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`)
+    }
+
+    const result = await response.json()
+    console.log('✅ Respuesta completa de la API de Mushroom:', result)
+
+    // Procesar la respuesta de la API de hongos según el nuevo formato
+    if (result.result && result.result.classification && result.result.classification.suggestions && result.result.classification.suggestions.length > 0) {
+      const topSuggestion = result.result.classification.suggestions[0]
+      const confidence = Math.round(topSuggestion.probability * 100)
+      
+      console.log('🔍 Procesando sugerencia principal de hongo:', topSuggestion)
+     
+      
+      // Extraer información detallada del hongo
+      const mushroomName = topSuggestion.name || 'Hongo no identificado'
+      const similarImages = topSuggestion.similar_images || []
+      
+      analysisResult.value = {
+        name: mushroomName,
+        confidence: `${confidence}%`,
+        commonNames: [], // La nueva API no parece incluir nombres comunes directamente
+ 
+        taxonomy: {}, // La nueva API no incluye taxonomía detallada
+        similarImages: similarImages.slice(0, 3), // Mostrar solo las primeras 3 imágenes similares
+        fullConfidence: confidence,
+
+        rawData: result // Para debug completo
+      }
+      console.log('✅ Resultado de hongo procesado:', analysisResult.value)
+    } else {
+      // No se encontraron sugerencias
+      analysisResult.value = {
+        name: 'No se pudo identificar el hongo',
+        confidence: '0%',
+        commonNames: [],
+        description: 'El hongo no pudo ser identificado. Intenta con una imagen más clara o desde otro ángulo.',
+        taxonomy: {},
+        similarImages: [],
+        fullConfidence: 0,
+
+      }
+      console.log('⚠️ No se encontraron sugerencias de hongos en la respuesta')
+    }
+
+  } catch (error) {
+    console.error('❌ Error al analizar imagen:', error)
+    
+    // Determinar el tipo de error y mostrar mensaje apropiado
+    let errorMessage = 'Error desconocido'
+    
+    if (error.message.includes('Error HTTP: 401')) {
+      errorMessage = 'Error de autenticación: API key inválida'
+    } else if (error.message.includes('Error HTTP: 429')) {
+      errorMessage = 'Límite de peticiones alcanzado. Intenta más tarde.'
+    } else if (error.message.includes('Error HTTP: 400')) {
+      errorMessage = 'Error en los datos enviados'
+    } else if (error.message.includes('Failed to fetch')) {
+      errorMessage = 'Error de conexión. Verifica tu internet.'
+    } else if (error.message.includes('Error HTTP:')) {
+      errorMessage = `Error del servidor: ${error.message}`
+    } else {
+      errorMessage = 'Error al procesar la imagen'
+    }
+    
+    // Mostrar error al usuario
+    analysisResult.value = {
+      name: 'Error en el análisis',
+      confidence: errorMessage,
+      commonNames: [],
+      description: 'Hubo un problema al analizar la imagen. Por favor, intenta nuevamente.',
+      taxonomy: {},
+      similarImages: [],
+      error: true,
+      errorDetails: error.message
+    }
+    
+    // Opcional: mostrar alerta al usuario
+    alert(`Error: ${errorMessage}`)
+  } finally {
     isAnalyzing.value = false
-  }, 2000)
+    console.log('🔍 === FIN analyzeImage ===')
+  }
+}
+
+// Función auxiliar para convertir imagen a base64
+const convertImageToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      // Remover el prefijo "data:image/...;base64," para obtener solo la cadena base64
+      const base64String = reader.result.replace(/^data:image\/[a-zA-Z]+;base64,/, '')
+      console.log('📷 Base64 generado (primeros 50 chars):', base64String.substring(0, 50) + '...')
+      resolve(base64String)
+    }
+    reader.onerror = (error) => {
+      console.error('❌ Error en FileReader para base64:', error)
+      reject(error)
+    }
+    reader.readAsDataURL(file)
+  })
 }
 
 // Función para limpiar la imagen seleccionada
@@ -168,7 +289,15 @@ const clearImage = () => {
     <div class="bg-yellow-50 border border-yellow-200 rounded p-2 mb-4 text-xs">
       <div>🖼️ imagePreview: {{ imagePreview ? 'Cargada' : 'Vacía' }}</div>
       <div>📁 selectedImage: {{ selectedImage ? selectedImage.name : 'Vacío' }}</div>
-      <div>🔍 analysisResult: {{ analysisResult ? 'Presente' : 'Vacío' }}</div>
+      <div>🔍 analysisResult: {{ analysisResult ? analysisResult.name : 'Vacío' }}</div>
+      <div>⏳ isAnalyzing: {{ isAnalyzing ? 'Analizando...' : 'Inactivo' }}</div>
+      <div v-if="analysisResult && analysisResult.fullConfidence !== undefined">
+        📊 Confianza: {{ analysisResult.fullConfidence }}%
+      </div>
+
+      <div v-if="analysisResult && analysisResult.error" class="text-red-600">
+        ❌ Error: {{ analysisResult.errorDetails }}
+      </div>
     </div>
     
     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-8">
@@ -202,12 +331,54 @@ const clearImage = () => {
         <!-- no tiene v-else porque si no hay resultado no muestra nombre ni confianza no muestra nada -->
         <div class="p-4 md:p-6 flex flex-col items-center w-full">
           <div v-if="analysisResult" class="w-full max-w-sm">
-            <div class="font-bold border bg-black text-white rounded-lg p-3 w-full text-center">
+            <!-- Resultado principal -->
+            <div 
+              class="font-bold border rounded-lg p-3 w-full text-center"
+              :class="analysisResult.error ? 'bg-red-500 text-white' : 'bg-black text-white'"
+            >
               {{ analysisResult.name }}
             </div>
-            <div class="p-2 text-gray-700 font-bold text-center">
-              {{ analysisResult.confidence }}
+            
+            <!-- Confianza -->
+            <div 
+              class="p-2 font-bold text-center"
+              :class="analysisResult.error ? 'text-red-700' : 'text-gray-700'"
+            >
+              {{ analysisResult.error ? analysisResult.confidence : `Confianza: ${analysisResult.confidence}` }}
             </div>
+            
+            <!-- Descripción (si existe y no es error) -->
+            <div v-if="analysisResult.description && !analysisResult.error" 
+                 class="p-2 text-sm text-gray-600 text-center">
+              <strong>Descripción:</strong>
+              <div class="mt-1 text-justify">
+                {{ analysisResult.description }}
+              </div>
+            </div>
+            
+            <!-- Nombres comunes (si existen) -->
+            <div v-if="analysisResult.commonNames && analysisResult.commonNames.length > 0" 
+                 class="p-2 text-sm text-gray-600 text-center">
+              <strong>Nombres comunes:</strong>
+              <div class="mt-1">
+                {{ analysisResult.commonNames.join(', ') }}
+              </div>
+            </div>
+            
+            <!-- Taxonomía (si existe) -->
+            <div v-if="analysisResult.taxonomy && Object.keys(analysisResult.taxonomy).length > 0 && !analysisResult.error" 
+                 class="p-2 text-sm text-gray-600 text-center">
+              <strong>Clasificación:</strong>
+              <div class="mt-1 space-y-1">
+                <div v-if="analysisResult.taxonomy.kingdom">Reino: {{ analysisResult.taxonomy.kingdom }}</div>
+                <div v-if="analysisResult.taxonomy.phylum">Filo: {{ analysisResult.taxonomy.phylum }}</div>
+                <div v-if="analysisResult.taxonomy.class">Clase: {{ analysisResult.taxonomy.class }}</div>
+                <div v-if="analysisResult.taxonomy.order">Orden: {{ analysisResult.taxonomy.order }}</div>
+                <div v-if="analysisResult.taxonomy.family">Familia: {{ analysisResult.taxonomy.family }}</div>
+                <div v-if="analysisResult.taxonomy.genus">Género: {{ analysisResult.taxonomy.genus }}</div>
+              </div>
+            </div>
+            
             <!-- Botón para volver a analizar -->
             <div class="pt-2">
               <button

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Morchel App</string>
+    <string name="title_activity_main">Morchel App</string>
+    <string name="package_name">com.morchelapp.reconocimientohongos</string>
+    <string name="custom_url_scheme">com.morchelapp.reconocimientohongos</string>
+</resources>

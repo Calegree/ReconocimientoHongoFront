@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "android": "cap run android",
+    "android:build": "npm run build && cap sync android && cap run android",
+    "android:release": "npm run build && cap sync android && cap build android"
   },
   "dependencies": {
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/splash-screen": "^7.0.2",
     "@vue/cli-plugin-pwa": "^5.0.9",
     "chart.js": "^4.5.0",
     "flowbite": "^3.1.2",
@@ -21,12 +26,16 @@
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "@tailwindcss/postcss": "^4.1.11",
     "@vitejs/plugin-vue": "^6.0.0",
     "postcss": "^8.5.6",
     "prettier": "3.5.3",
     "tailwindcss": "^4.1.11",
     "vite": "^7.0.0",
+    "vite-plugin-pwa": "^1.0.3",
     "vite-plugin-vue-devtools": "^7.7.7",
     "workbox-webpack-plugin": "^7.3.0"
   }

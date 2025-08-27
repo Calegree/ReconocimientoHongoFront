@@ -28,9 +28,20 @@ const handleFileUpload = (event) => {
 
 <template>
   <!-- HTML del componente -->
-  <Title />
-  <ImageUpload />
-
+  <div class="min-h-screen bg-gray-50">
+    <!-- Container principal con padding y spacing -->
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <!-- Espaciado superior para evitar pegarse al borde -->
+      <div class="pt-4">
+        <Title />
+      </div>
+      
+      <!-- Espaciado entre título e ImageUpload -->
+      <div class="mt-8">
+        <ImageUpload />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>

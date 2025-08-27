@@ -1,7 +1,6 @@
 <script setup>
 // Lógica del componente
 import Title from '../components/Title.vue'
-import NavBar from '../components/NavBar.vue'
 import ImageUpload from '@/components/ImageUpload.vue'
 import { ref } from 'vue'
 
@@ -31,7 +30,7 @@ const handleFileUpload = (event) => {
   <!-- HTML del componente -->
   <Title />
   <ImageUpload />
-  <NavBar />
+
 </template>
 
 <style scoped>

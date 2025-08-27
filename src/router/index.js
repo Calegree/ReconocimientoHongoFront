@@ -5,16 +5,6 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
-    },
-    {
-      path: '/model-training',
-      name: 'model-training',
-      component: () => import('../views/ModelTrainingView.vue'),
-    },
-    {
-      path: '/recognition',
       name: 'recognition',
       component: () => import('../views/RecognitionView.vue'),
     },

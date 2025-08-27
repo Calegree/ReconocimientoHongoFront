@@ -3,7 +3,7 @@
 
 import { ref } from 'vue'
 import { Image, Camera, Upload, X } from 'lucide-vue-next'
-
+import axios from 'axios'
 const selectedImage = ref(null) // Inicialmente no hay imagen
 const imagePreview = ref(null) // Inicialmente no hay URL de la imagen para mostrar en preview
 const isAnalyzing = ref(false) // Verifica si está analizando
@@ -46,19 +46,41 @@ const analyzeImage = async () => {
   //avisa que esta analizando
   isAnalyzing.value = true
 
-  //conecta con la api de reconocimiento y obtiene un json con
-  //nombre del hongo (clase donde se encasilla a la foto)
-  //porcentaje de confianza con que se identificó
+  const API_URL = '/api/predict'
+  const formData = new FormData()
+  formData.append('imagen', selectedImage.value)
 
-  //simulacion de prueba da un json con morchella y 71.9 confianza
-  //tiene 2000 para ver que onda los spinners
-  setTimeout(() => {
+  try {
+    const { data } = await axios.post(API_URL, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    // el backend devuelve
+    /*
+    {
+  "resultado": "No es morchella",
+  "confianza": 0.704,
+  "probabilidad_morchella": 0.296,
+  "probabilidad_no_morchella": 0.704,
+  "model_info": {
+    "source": "local_file",
+    "path": "C:\\Users\\Carlos\\Desktop\\Morchellapp\\Exploracion2030Backend\\src\\resources\\..\\model\\model_morchella.h5"
+  }
+}
+    */
     analysisResult.value = {
-      name: 'Morchella',
-      confidence: 'Confianza: 71.9%',
+      name: data.resultado,
+      confidence: `Confianza: ${(Number(data.confianza) * 100).toFixed(1)}%`,
     }
+  } catch (err) {
+    console.error(err)
+    analysisResult.value = {
+      name: 'Error',
+      confidence: 'No se pudo analizar la imagen',
+    }
+  } finally {
     isAnalyzing.value = false
-  }, 2000)
+  }
 }
 
 // Función para limpiar la imagen seleccionada

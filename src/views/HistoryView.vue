@@ -1,24 +1,70 @@
 <script setup>
 import { useHistoryStore } from '@/stores/history'
 import { computed, ref } from 'vue'
-import { Trash2, Calendar, BarChart3, AlertTriangle, X } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { Trash2, Calendar, BarChart3, AlertTriangle, X, ArrowLeft, Download, Upload } from 'lucide-vue-next'
 
 const historyStore = useHistoryStore()
+const router = useRouter()
 const showDeleteConfirmation = ref(false)
 const itemToDelete = ref(null)
+const fileInput = ref(null)
 
 // Computed para obtener el historial ordenado
 const historyItems = computed(() => historyStore.historyItems)
 
+// Computed para estadísticas
+const stats = computed(() => historyStore.getHistoryStats())
+
+// Navigate back to camera
+const goBack = () => {
+  router.push('/')
+}
+
+// Export history
+const exportHistory = () => {
+  historyStore.exportHistory()
+}
+
+// Import history
+const importHistory = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  historyStore.importHistory(file)
+    .then((count) => {
+      alert(`${count} elementos importados exitosamente`)
+    })
+    .catch((error) => {
+      alert(`Error al importar: ${error.message}`)
+    })
+    .finally(() => {
+      // Clear file input
+      if (fileInput.value) {
+        fileInput.value.value = ''
+      }
+    })
+}
+
+// Trigger file input
+const triggerImport = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
 // Formatear fecha
 const formatDate = (date) => {
+  // Asegurar que tenemos un objeto Date válido
+  const dateObj = date instanceof Date ? date : new Date(date)
+  
   return new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
-  }).format(date)
+  }).format(dateObj)
 }
 
 // Obtener color según la confianza
@@ -73,22 +119,83 @@ const clearAllHistory = () => {
 <template>
   <div class="min-h-screen bg-background">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
-      <!-- Encabezado -->
+      <!-- Back Button and Header -->
       <div class="mb-8">
+        <button 
+          @click="goBack"
+          class="mb-4 flex items-center gap-2 text-text hover:text-text-deep transition-colors"
+        >
+          <ArrowLeft class="w-5 h-5" />
+          <span>Volver a la cámara</span>
+        </button>
+        
         <h1 class="text-3xl font-bold text-text mb-2">Historial de Reconocimientos</h1>
-        <p class="text-text-deep">
+        <p class="text-text-deep mb-2">
           Aquí puedes ver todos los análisis de hongos que has realizado
         </p>
+        <p class="text-sm text-text-deep opacity-75 mb-4">
+          💾 Los datos se guardan automáticamente en tu dispositivo
+        </p>
+
+        <!-- Statistics Card -->
+        <div v-if="historyItems.length > 0" class="mt-4 bg-sand bg-opacity-20 rounded-lg p-4 border border-hover">
+          <h3 class="font-semibold text-text mb-2">Estadísticas del Historial</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="text-center">
+              <div class="font-bold text-text text-lg">{{ stats.total }}</div>
+              <div class="text-text-deep">Total</div>
+            </div>
+            <div class="text-center">
+              <div class="font-bold text-green-600 text-lg">{{ stats.successful }}</div>
+              <div class="text-text-deep">Exitosos</div>
+            </div>
+            <div class="text-center">
+              <div class="font-bold text-red-600 text-lg">{{ stats.errors }}</div>
+              <div class="text-text-deep">Errores</div>
+            </div>
+            <div class="text-center">
+              <div class="font-bold text-text text-lg">{{ stats.successRate }}%</div>
+              <div class="text-text-deep">Éxito</div>
+            </div>
+          </div>
+        </div>
         
-        <!-- Botón limpiar historial -->
-        <div class="mt-4" v-if="historyItems.length > 0">
+        <!-- Action buttons -->
+        <div class="mt-4 flex flex-wrap gap-2">
           <button
+            v-if="historyItems.length > 0"
             @click="clearAllHistory"
             class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
           >
             <Trash2 class="w-4 h-4" />
             Limpiar Historial
           </button>
+
+          <button
+            v-if="historyItems.length > 0"
+            @click="exportHistory"
+            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <Download class="w-4 h-4" />
+            Exportar
+          </button>
+
+          <button
+            @click="triggerImport"
+            class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+          >
+            <Upload class="w-4 h-4" />
+            Importar
+          </button>
+
+          <!-- Hidden file input for import -->
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".json"
+            @change="importHistory"
+            class="hidden"
+          />
         </div>
       </div>
 
@@ -214,6 +321,7 @@ const clearAllHistory = () => {
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -16,9 +16,12 @@
         v-show="!isStreaming && !capturedImage" 
         class="w-full h-full bg-gray-900 flex items-center justify-center"
       >
-        <div class="text-center text-white">
+        <div class="text-center text-white px-6">
           <CameraIcon class="mx-auto mb-4 h-16 w-16 opacity-50" />
-          <p class="text-lg opacity-70">Toca el botón de cámara para comenzar</p>
+          <p class="text-lg opacity-70">📷 Iniciando cámara...</p>
+          <p class="text-sm opacity-50 mt-2">
+            Permite el acceso a la cámara para comenzar
+          </p>
         </div>
       </div>
 
@@ -173,9 +176,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
 import { CameraIcon, Image, Upload, X, BarChart3Icon } from 'lucide-vue-next'
 import { useHistoryStore } from '@/stores/history'
@@ -192,12 +194,14 @@ const isAnalyzing = ref(false)
 const analysisResult = ref(null)
 const showResult = ref(false)
 
+// Check if we're on native platform (for debug info)
+const isNative = computed(() => Capacitor.isNativePlatform())
+
 // Initialize camera on component mount
-onMounted(() => {
-  if (!Capacitor.isNativePlatform()) {
-    // For web browsers, we'll start the camera immediately
-    // startCamera()
-  }
+onMounted(async () => {
+  console.log('CameraView mounted - Platform:', Capacitor.getPlatform())
+  // Start camera immediately on both web and mobile platforms
+  await startCamera()
 })
 
 // Cleanup camera stream on component unmount
@@ -207,13 +211,12 @@ onUnmounted(() => {
 
 const startCamera = async () => {
   try {
-    if (Capacitor.isNativePlatform()) {
-      // On native platforms, we'll use the capacitor camera directly
-      return
-    }
-
-    // For web browsers
+    console.log('Starting camera...')
+    
+    // Use getUserMedia for both web and mobile platforms
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      console.log('Requesting camera access...')
+      
       stream.value = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',  // Use back camera
@@ -222,16 +225,32 @@ const startCamera = async () => {
         } 
       })
       
+      console.log('Camera stream obtained')
+      
       if (videoElement.value) {
         videoElement.value.srcObject = stream.value
         isStreaming.value = true
+        console.log('Video element configured')
+      } else {
+        console.error('Video element not found')
       }
     } else {
-      console.warn('Camera not available in this browser')
+      console.warn('getUserMedia not available')
+      alert('La cámara no está disponible en este dispositivo.')
     }
   } catch (error) {
     console.error('Error accessing camera:', error)
-    alert('No se pudo acceder a la cámara. Asegúrate de dar permisos.')
+    let errorMessage = 'No se pudo acceder a la cámara.'
+    
+    if (error.name === 'NotAllowedError') {
+      errorMessage = 'Permisos de cámara denegados. Por favor, permite el acceso a la cámara.'
+    } else if (error.name === 'NotFoundError') {
+      errorMessage = 'No se encontró ninguna cámara en este dispositivo.'
+    } else if (error.name === 'NotReadableError') {
+      errorMessage = 'La cámara está siendo usada por otra aplicación.'
+    }
+    
+    alert(errorMessage)
   }
 }
 
@@ -252,36 +271,18 @@ const handleMainAction = async () => {
 }
 
 const capturePhoto = () => {
-  if (Capacitor.isNativePlatform()) {
-    // Use native camera
-    takePhotoNative()
-  } else {
-    // Capture from video stream
-    captureFromStream()
-  }
-}
-
-const takePhotoNative = async () => {
-  try {
-    const image = await CapCamera.getPhoto({
-      quality: 90,
-      allowEditing: false,
-      resultType: CameraResultType.DataUrl,
-      source: CameraSource.Camera
-    })
-
-    if (image.dataUrl) {
-      capturedImage.value = image.dataUrl
-      stopCamera()
-    }
-  } catch (error) {
-    console.error('Error taking photo:', error)
-    alert('Error al tomar la foto')
-  }
+  // Always capture from video stream for consistent behavior
+  captureFromStream()
 }
 
 const captureFromStream = () => {
-  if (!videoElement.value || !stream.value) return
+  if (!videoElement.value || !stream.value) {
+    console.error('Video element or stream not available')
+    alert('Error: La cámara no está activa')
+    return
+  }
+
+  console.log('Capturing photo from stream...')
 
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')
@@ -293,6 +294,8 @@ const captureFromStream = () => {
   
   capturedImage.value = canvas.toDataURL('image/jpeg', 0.9)
   stopCamera()
+  
+  console.log('Photo captured successfully')
 }
 
 const retakePhoto = () => {

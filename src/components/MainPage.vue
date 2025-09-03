@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen bg-background flex flex-col">
     <!-- Header -->
-    <header class="border-b bg-card p-4">
-      <h1 class="text-2xl font-bold text-center">Reconocimiento Morchella</h1>
-      <p class="text-sm text-muted-foreground text-center mt-1">
+    <header class="border-b border-border bg-background p-4 shadow-sm">
+      <h1 class="text-2xl font-bold text-center text-text">Reconocimiento Morchella</h1>
+      <p class="text-sm text-text-deep text-center mt-1">
         Sistema de IA para identificación de hongos
       </p>
     </header>
@@ -14,12 +14,12 @@
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-card border-t">
+    <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg">
       <div class="flex justify-around items-center py-2">
         <button
           :class="[
             'flex flex-col items-center gap-1 h-auto py-2 px-3 rounded-md transition-colors',
-            activeTab === 'dashboard' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+            activeTab === 'dashboard' ? 'bg-sand text-background shadow-md' : 'hover:bg-hover text-text',
           ]"
           @click="setActiveTab('dashboard')"
         >
@@ -30,7 +30,7 @@
         <button
           :class="[
             'flex flex-col items-center gap-1 h-auto py-2 px-3 rounded-md transition-colors',
-            activeTab === 'recognition' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+            activeTab === 'recognition' ? 'bg-sand text-background shadow-md' : 'hover:bg-hover text-text',
           ]"
           @click="setActiveTab('recognition')"
         >
@@ -41,7 +41,7 @@
         <button
           :class="[
             'flex flex-col items-center gap-1 h-auto py-2 px-3 rounded-md transition-colors',
-            activeTab === 'model' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+            activeTab === 'model' ? 'bg-sand text-background shadow-md' : 'hover:bg-hover text-text',
           ]"
           @click="setActiveTab('model')"
         >
@@ -83,40 +83,37 @@ const setActiveTab = (tab) => {
 </script>
 
 <style scoped>
+/* Actualizados con la nueva paleta de colores */
 .bg-background {
-  background-color: #ffffff;
+  background-color: #E6D7B8;
 }
 
-.bg-card {
-  background-color: #ffffff;
+.bg-sand {
+  background-color: #C2A878;
 }
 
-.border-b {
-  border-bottom: 1px solid #e5e7eb;
+.text-background {
+  color: #E6D7B8;
 }
 
-.border-t {
-  border-top: 1px solid #e5e7eb;
+.text-text {
+  color: #5A4633;
 }
 
-.bg-primary {
-  background-color: #3b82f6;
+.text-text-deep {
+  color: #3B2C23;
 }
 
-.text-primary-foreground {
-  color: #ffffff;
+.bg-hover {
+  background-color: #8B6E45;
 }
 
-.bg-muted {
-  background-color: #f3f4f6;
+.hover\:bg-hover:hover {
+  background-color: #8B6E45;
 }
 
-.hover\:bg-muted:hover {
-  background-color: #f3f4f6;
-}
-
-.text-muted-foreground {
-  color: #6b7280;
+.border-border {
+  border-color: #3B2C23;
 }
 
 .transition-colors {

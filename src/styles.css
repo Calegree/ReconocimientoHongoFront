@@ -1,2 +1,42 @@
 @import 'tailwindcss';
 @import 'flowbite';
+
+/* Estilos globales con la nueva paleta de colores */
+body {
+  background-color: #E6D7B8;
+  color: #5A4633;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Aplicar la paleta en toda la aplicación */
+* {
+  border-color: #3B2C23;
+}
+
+/* Variables CSS personalizadas */
+:root {
+  --color-background: #E6D7B8;
+  --color-sand: #C2A878;
+  --color-text: #5A4633;
+  --color-text-deep: #3B2C23;
+  --color-hover: #8B6E45;
+  --color-border: #3B2C23;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-deep);
+}

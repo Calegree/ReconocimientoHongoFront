@@ -5,19 +5,23 @@ import { ref, watch } from 'vue'
 import { Image, Camera, Upload, X } from 'lucide-vue-next'
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
+import { useHistoryStore } from '@/stores/history'
 
 const selectedImage = ref(null) // Inicialmente no hay imagen
 const imagePreview = ref(null) // Inicialmente no hay URL de la imagen para mostrar en preview
 const isAnalyzing = ref(false) // Verifica si está analizando
 const analysisResult = ref(null) // Inicialmente no hay resultado del análisis
 
+// Store del historial
+const historyStore = useHistoryStore()
+
 // Watchers para debug
 watch(imagePreview, (newVal) => {
-  console.log('🖼️ imagePreview cambió:', newVal ? 'Imagen cargada' : 'Sin imagen')
+  console.log(' imagePreview cambió:', newVal ? 'Imagen cargada' : 'Sin imagen')
 })
 
 watch(selectedImage, (newVal) => {
-  console.log('📁 selectedImage cambió:', newVal ? `Archivo: ${newVal.name}` : 'Sin archivo')
+  console.log(' selectedImage cambió:', newVal ? `Archivo: ${newVal.name}` : 'Sin archivo')
 })
 
 // este metodo se activa en el evento de subir imagen
@@ -31,7 +35,7 @@ const handleFileUpload = (event) => {
   const file = event.target.files?.[0]
 
   if (file) {
-    console.log('✅ Archivo detectado:', {
+    console.log(' Archivo detectado:', {
       name: file.name,
       size: file.size,
       type: file.type
@@ -50,31 +54,31 @@ const handleFileUpload = (event) => {
     //este funciona asi:
     const reader = new FileReader()
     reader.onload = (e) => {
-      console.log('✅ FileReader completado, resultado:', e.target.result?.substring(0, 100) + '...')
+      console.log(' FileReader completado, resultado:', e.target.result?.substring(0, 100) + '...')
       //asigna el file transformado en URL a una variable reactiva
       imagePreview.value = e.target.result
-      console.log('✅ imagePreview.value actualizado')
+      console.log('imagePreview.value actualizado')
     }
     reader.onerror = (e) => {
-      console.error('❌ Error en FileReader:', e)
+      console.error('Error en FileReader:', e)
     }
     //transforma el file a URL de forma asincrona
     reader.readAsDataURL(file)
-    console.log('📖 Iniciando lectura con FileReader...')
+    console.log('Iniciando lectura con FileReader...')
   } else {
-    console.log('❌ No se encontró archivo')
+    console.log('No se encontró archivo')
   }
   
   // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
   event.target.value = ''
-  console.log('🧹 Input limpiado')
+  console.log(' Input limpiado')
   console.log('=== FIN handleFileUpload ===')
 }
 
 // Función para tomar foto con la cámara
 const takePhoto = async () => {
   try {
-    console.log('📸 === INICIO takePhoto ===')
+    console.log(' === INICIO takePhoto ===')
     
     // Limpiar resultado anterior cuando se toma nueva foto
     analysisResult.value = null
@@ -82,7 +86,7 @@ const takePhoto = async () => {
     
     // Verifica si estamos en un dispositivo móvil
     if (!Capacitor.isNativePlatform()) {
-      console.log('🌐 Ejecutándose en navegador web')
+      console.log(' Ejecutándose en navegador web')
       // En navegador web, usa la API de MediaDevices si está disponible
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         // Crear un input file que active la cámara
@@ -91,19 +95,19 @@ const takePhoto = async () => {
         input.accept = 'image/*'
         input.capture = 'environment' // Usa la cámara trasera
         input.onchange = (e) => {
-          console.log('📸 Foto tomada desde navegador')
+          console.log(' Foto tomada desde navegador')
           handleFileUpload(e)
         }
         input.click()
         return
       } else {
-        console.log('❌ La cámara no está disponible en este navegador')
+        console.log(' La cámara no está disponible en este navegador')
         alert('La cámara no está disponible en este navegador')
         return
       }
     }
 
-    console.log('📱 Ejecutándose en dispositivo móvil nativo')
+    console.log('Ejecutándose en dispositivo móvil nativo')
     // Para dispositivos móviles nativos
     const image = await CapCamera.getPhoto({
       quality: 90,
@@ -114,19 +118,19 @@ const takePhoto = async () => {
 
     // La imagen viene como data URL
     if (image.dataUrl) {
-      console.log('✅ Foto obtenida de cámara nativa')
+      console.log('Foto obtenida de cámara nativa')
       imagePreview.value = image.dataUrl
       // Convertir dataUrl a blob para selectedImage
       const response = await fetch(image.dataUrl)
       const blob = await response.blob()
       selectedImage.value = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' })
-      console.log('✅ Archivo creado desde foto de cámara')
+      console.log(' Archivo creado desde foto de cámara')
     }
   } catch (error) {
-    console.error('❌ Error al tomar foto:', error)
+    console.error(' Error al tomar foto:', error)
     alert('Error al acceder a la cámara')
   }
-  console.log('📸 === FIN takePhoto ===')
+  console.log(' === FIN takePhoto ===')
 }
 
 const analyzeImage = async () => {
@@ -136,11 +140,11 @@ const analyzeImage = async () => {
   isAnalyzing.value = true
 
   try {
-    console.log('🔍 === INICIO analyzeImage ===')
+    console.log(' === INICIO analyzeImage ===')
     
     // Convertir la imagen a base64
     const base64Image = await convertImageToBase64(selectedImage.value)
-    console.log('📷 Imagen convertida a base64')
+    console.log('Imagen convertida a base64')
 
     // Preparar la petición a la API de Kindwise Mushroom
     const apiUrl = 'https://mushroom.kindwise.com/api/v1/identification'
@@ -153,8 +157,8 @@ const analyzeImage = async () => {
                         similar_images: true
     }
 
-    console.log('🚀 Enviando petición a la API de Mushroom Identification...')
-    console.log('📋 Request body:', requestBody)
+    console.log('Enviando petición a la API de Mushroom Identification...')
+    console.log('Request body:', requestBody)
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -167,19 +171,19 @@ const analyzeImage = async () => {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Error de API:', response.status, response.statusText, errorText)
+      console.error('Error de API:', response.status, response.statusText, errorText)
       throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`)
     }
 
     const result = await response.json()
-    console.log('✅ Respuesta completa de la API de Mushroom:', result)
+    console.log(' Respuesta completa de la API de Mushroom:', result)
 
     // Procesar la respuesta de la API de hongos según el nuevo formato
     if (result.result && result.result.classification && result.result.classification.suggestions && result.result.classification.suggestions.length > 0) {
       const topSuggestion = result.result.classification.suggestions[0]
       const confidence = Math.round(topSuggestion.probability * 100)
       
-      console.log('🔍 Procesando sugerencia principal de hongo:', topSuggestion)
+      console.log(' Procesando sugerencia principal de hongo:', topSuggestion)
      
       
       // Extraer información detallada del hongo
@@ -197,7 +201,7 @@ const analyzeImage = async () => {
 
         rawData: result // Para debug completo
       }
-      console.log('✅ Resultado de hongo procesado:', analysisResult.value)
+      console.log(' Resultado de hongo procesado:', analysisResult.value)
     } else {
       // No se encontraron sugerencias
       analysisResult.value = {
@@ -210,11 +214,11 @@ const analyzeImage = async () => {
         fullConfidence: 0,
 
       }
-      console.log('⚠️ No se encontraron sugerencias de hongos en la respuesta')
+      console.log(' No se encontraron sugerencias de hongos en la respuesta')
     }
 
   } catch (error) {
-    console.error('❌ Error al analizar imagen:', error)
+    console.error(' Error al analizar imagen:', error)
     
     // Determinar el tipo de error y mostrar mensaje apropiado
     let errorMessage = 'Error desconocido'
@@ -249,7 +253,24 @@ const analyzeImage = async () => {
     alert(`Error: ${errorMessage}`)
   } finally {
     isAnalyzing.value = false
-    console.log('🔍 === FIN analyzeImage ===')
+    
+    // Guardar en el historial si hay un resultado válido
+    if (analysisResult.value && imagePreview.value) {
+      const historyItem = {
+        image: imagePreview.value, // URL de la imagen para mostrar
+        result: analysisResult.value, // Resultado completo del análisis
+        originalFile: selectedImage.value ? {
+          name: selectedImage.value.name,
+          size: selectedImage.value.size,
+          type: selectedImage.value.type
+        } : null
+      }
+      
+      historyStore.addToHistory(historyItem)
+      console.log('Resultado guardado en el historial')
+    }
+    
+    console.log(' === FIN analyzeImage ===')
   }
 }
 
@@ -286,12 +307,12 @@ const clearImage = () => {
   <!-- Container responsivo -->
   <div class="w-full max-w-2xl mx-auto px-4">
     <!-- Panel de debug (temporal para testing) -->
-    <div class="bg-yellow-50 border border-yellow-200 rounded p-2 mb-4 text-xs">
-      <div>🖼️ imagePreview: {{ imagePreview ? 'Cargada' : 'Vacía' }}</div>
-      <div>📁 selectedImage: {{ selectedImage ? selectedImage.name : 'Vacío' }}</div>
-      <div>🔍 analysisResult: {{ analysisResult ? analysisResult.name : 'Vacío' }}</div>
-      <div>⏳ isAnalyzing: {{ isAnalyzing ? 'Analizando...' : 'Inactivo' }}</div>
-      <div v-if="analysisResult && analysisResult.fullConfidence !== undefined">
+    <div class="bg-sand bg-opacity-30 border border-hover rounded p-2 mb-4 text-xs">
+      <div class="text-text">🖼️ imagePreview: {{ imagePreview ? 'Cargada' : 'Vacía' }}</div>
+      <div class="text-text">📁 selectedImage: {{ selectedImage ? selectedImage.name : 'Vacío' }}</div>
+      <div class="text-text">🔍 analysisResult: {{ analysisResult ? analysisResult.name : 'Vacío' }}</div>
+      <div class="text-text">⏳ isAnalyzing: {{ isAnalyzing ? 'Analizando...' : 'Inactivo' }}</div>
+      <div v-if="analysisResult && analysisResult.fullConfidence !== undefined" class="text-text">
         📊 Confianza: {{ analysisResult.fullConfidence }}%
       </div>
 
@@ -300,13 +321,13 @@ const clearImage = () => {
       </div>
     </div>
     
-    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-8">
+    <div class="border-2 border-dashed border-hover rounded-lg p-4 md:p-8 bg-background shadow-sm">
       <!--si no hay imagen almacenada en el preview-->
       <div v-if="!imagePreview" class="text-center">
         <!-- muestra Image que viene de lucide por default-->
-        <Image class="w-16 h-16 md:w-24 md:h-24 text-gray-500 mx-auto mb-4" />
-        <h1 class="text-lg md:text-xl font-medium mb-2">Selecciona una imagen</h1>
-        <p class="text-sm md:text-base font-medium text-gray-600">O usa la cámara para fotografiar un hongo</p>
+        <Image class="w-16 h-16 md:w-24 md:h-24 text-text-deep mx-auto mb-4" />
+        <h1 class="text-lg md:text-xl font-medium mb-2 text-text">Selecciona una imagen</h1>
+        <p class="text-sm md:text-base font-medium text-text-deep">O usa la cámara para fotografiar un hongo</p>
       </div>
       <!--Previsualización de imagen-->
       <!-- si hay una imagen almacenada en el preview-->
@@ -320,7 +341,7 @@ const clearImage = () => {
           />
           <button
             @click="clearImage"
-            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 shadow-lg"
+            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 shadow-lg border-2 border-border"
           >
             <X class="w-4 h-4" />
           </button>
@@ -333,8 +354,8 @@ const clearImage = () => {
           <div v-if="analysisResult" class="w-full max-w-sm">
             <!-- Resultado principal -->
             <div 
-              class="font-bold border rounded-lg p-3 w-full text-center"
-              :class="analysisResult.error ? 'bg-red-500 text-white' : 'bg-black text-white'"
+              class="font-bold border border-border rounded-lg p-3 w-full text-center shadow-md"
+              :class="analysisResult.error ? 'bg-red-500 text-white' : 'bg-sand text-background'"
             >
               {{ analysisResult.name }}
             </div>
@@ -342,14 +363,14 @@ const clearImage = () => {
             <!-- Confianza -->
             <div 
               class="p-2 font-bold text-center"
-              :class="analysisResult.error ? 'text-red-700' : 'text-gray-700'"
+              :class="analysisResult.error ? 'text-red-700' : 'text-text-deep'"
             >
               {{ analysisResult.error ? analysisResult.confidence : `Confianza: ${analysisResult.confidence}` }}
             </div>
             
             <!-- Descripción (si existe y no es error) -->
             <div v-if="analysisResult.description && !analysisResult.error" 
-                 class="p-2 text-sm text-gray-600 text-center">
+                 class="p-2 text-sm text-text text-center">
               <strong>Descripción:</strong>
               <div class="mt-1 text-justify">
                 {{ analysisResult.description }}
@@ -358,7 +379,7 @@ const clearImage = () => {
             
             <!-- Nombres comunes (si existen) -->
             <div v-if="analysisResult.commonNames && analysisResult.commonNames.length > 0" 
-                 class="p-2 text-sm text-gray-600 text-center">
+                 class="p-2 text-sm text-text text-center">
               <strong>Nombres comunes:</strong>
               <div class="mt-1">
                 {{ analysisResult.commonNames.join(', ') }}
@@ -367,7 +388,7 @@ const clearImage = () => {
             
             <!-- Taxonomía (si existe) -->
             <div v-if="analysisResult.taxonomy && Object.keys(analysisResult.taxonomy).length > 0 && !analysisResult.error" 
-                 class="p-2 text-sm text-gray-600 text-center">
+                 class="p-2 text-sm text-text text-center">
               <strong>Clasificación:</strong>
               <div class="mt-1 space-y-1">
                 <div v-if="analysisResult.taxonomy.kingdom">Reino: {{ analysisResult.taxonomy.kingdom }}</div>
@@ -379,10 +400,10 @@ const clearImage = () => {
               </div>
             </div>
             
-            <!-- Botón para volver a analizar -->
-            <div class="pt-2">
+            <!-- Botones de acción después del análisis -->
+            <div class="pt-2 space-y-2">
               <button
-                class="bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 rounded-lg w-full h-10 disabled:opacity-50 transition-colors"
+                class="bg-hover text-background hover:bg-text-deep border border-border rounded-lg w-full h-10 disabled:opacity-50 transition-colors shadow-md"
                 @click="analyzeImage"
                 :disabled="isAnalyzing"
               >
@@ -400,7 +421,7 @@ const clearImage = () => {
         <div class="pt-4 w-full">
           <button
             v-if="!analysisResult"
-            class="bg-black text-white hover:bg-gray-800 border border-gray-300 rounded-lg w-full max-w-sm h-12 mx-auto block disabled:opacity-50"
+            class="bg-sand text-background hover:bg-hover border border-border rounded-lg w-full max-w-sm h-12 mx-auto block disabled:opacity-50 shadow-md transition-colors"
             @click="analyzeImage"
             :disabled="isAnalyzing"
           >
@@ -418,7 +439,7 @@ const clearImage = () => {
       <!-- Botón de cámara -->
       <button
         @click="takePhoto"
-        class="bg-blue-600 text-white border border-blue-600 px-4 md:px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 w-full max-w-sm mx-auto transition-colors"
+        class="bg-hover text-background border border-border px-4 md:px-6 py-3 rounded-lg hover:bg-text-deep flex items-center justify-center gap-2 w-full max-w-sm mx-auto transition-colors shadow-md"
       >
         <Camera class="w-5 h-5" />
         <span class="text-sm md:text-base">Tomar Foto</span>
@@ -426,7 +447,7 @@ const clearImage = () => {
 
       <!-- Botón de subir imagen -->
       <label
-        class="bg-black text-white border border-gray-300 text-white px-4 md:px-6 py-3 rounded-lg hover:bg-gray-800 flex items-center justify-center gap-2 cursor-pointer w-full max-w-sm mx-auto transition-colors"
+        class="bg-sand text-background border border-border px-4 md:px-6 py-3 rounded-lg hover:bg-hover flex items-center justify-center gap-2 cursor-pointer w-full max-w-sm mx-auto transition-colors shadow-md"
       >
         <Upload class="w-5 h-5" />
         <span class="text-sm md:text-base">Subir Imagen</span>

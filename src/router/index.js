@@ -8,6 +8,11 @@ const router = createRouter({
       name: 'recognition',
       component: () => import('../views/RecognitionView.vue'),
     },
+    {
+      path: '/history',
+      name: 'history',
+      component: () => import('../views/HistoryView.vue'),
+    },
   ],
 })
 

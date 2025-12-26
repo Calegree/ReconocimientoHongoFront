@@ -78,7 +78,6 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-[#f5e6c8]">
-    <Title />
     <div class="flex-1 flex items-center justify-center">
       <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-lg w-full max-w-xl">
         <h2 class="text-center text-xl font-bold text-gold-900 mb-2">Actualizar Modelo de IA</h2>

@@ -1,8 +1,6 @@
 <script setup>
 // Lógica del componente
-import Title from '../components/Title.vue'
 import NavBar from '../components/NavBar.vue'
-import ImageUpload from '@/components/ImageUpload.vue'
 import { ref } from 'vue'
 import { Image, Camera } from 'lucide-vue-next'
 
@@ -50,12 +48,10 @@ const sendPredict = async (file) => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-[#f5e6c8]">
-    <div class="text-center mt-8 mb-2">
-      <h1 class="text-3xl font-bold text-gold-900">Reconocimiento Morchella</h1>
-      <p class="text-lg text-gold-700 mt-2">Sistema de IA para identificación de hongos</p>
-    </div>
-    <div class="flex-1 flex items-center justify-center">
+    <div class="flex-1 flex items-center justify-center px-4 py-8">
       <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-lg w-full max-w-xl">
+        <h2 class="text-center text-xl font-bold text-gold-900 mb-2">Reconocimiento Morchella</h2>
+        <p class="text-center text-base text-gold-700 mb-6">Sistema de IA para identificación de hongos</p>
         <div class="rounded-lg border-2 border-dashed p-8 text-center border-gold-300 mb-6">
           <Image class="mx-auto w-12 h-12 text-gold-500 mb-2" />
           <p class="text-xl font-semibold text-gold-900">Selecciona una imagen</p>
@@ -63,7 +59,7 @@ const sendPredict = async (file) => {
         </div>
 
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileUpload" />
-        <button @click="openFilePicker" class="w-full flex items-center justify-center gap-2 rounded-md bg-[#bfa14a] px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-[#8d6a00] transition-colors">
+        <button @click="openFilePicker" class="w-full flex items-center justify-center gap-2 rounded-md bg-gold-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-gold-600 transition-colors">
           <Camera class="h-5 w-5" />
           Subir Imagen
         </button>
@@ -88,4 +84,6 @@ const sendPredict = async (file) => {
 .text-gold-700 { color: #bfa14a; }
 .text-gold-500 { color: #d4af37; }
 .border-gold-300 { border-color: #d4af37; }
+.bg-gold-500 { background: #d4af37; }
+.hover\:bg-gold-600:hover { background: #bfa14a; }
 </style>

@@ -32,7 +32,6 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-[#f5e6c8]">
-    <Title />
     <div class="flex-1 flex items-center justify-center px-4 py-8">
       <div class="bg-white p-10 pt-12 rounded-xl border border-gray-200 shadow-lg w-full max-w-4xl overflow-visible">
         <h2 class="text-center text-xl font-bold text-gold-900 mb-6">Resumen del Sistema</h2>

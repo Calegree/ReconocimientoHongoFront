@@ -116,23 +116,6 @@ watch(() => toRaw(props.counts), (nv) => {
         </div>
       </div>
 
-      <!-- Métricas de Rendimiento (puedes completar con datos reales si los traes del backend) -->
-      <div class="space-y-3">
-        <div class="flex justify-between mb-1">
-          <span class="text-base font-medium text-gray-700">Precisión</span>
-          <span class="text-sm font-medium text-gray-700">{{ counts.precision || 'N/A' }}</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-          <div class="bg-gray-800 h-2.5 rounded-full" :style="{ width: (counts.precision ? counts.precision : 0) + '%' }"></div>
-        </div>
-        <div class="flex justify-between mb-1">
-          <span class="text-base font-medium text-gray-700">Recall (Sensibilidad)</span>
-          <span class="text-sm font-medium text-gray-700">{{ counts.recall || 'N/A' }}</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-          <div class="bg-gray-800 h-2.5 rounded-full" :style="{ width: (counts.recall ? counts.recall : 0) + '%' }"></div>
-        </div>
-      </div>
     </div>
 
     <!-- Distribución de Reconocimientos con Pie Chart -->

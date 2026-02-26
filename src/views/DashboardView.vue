@@ -5,17 +5,20 @@ import NavBar from '../components/NavBar.vue'
 import TextBox from '@/components/TextBox.vue'
 import ConfusionMatrix from '@/components/ConfusionMatrix.vue'
 import { Activity, TrendingUp, Target } from 'lucide-vue-next'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 
-// Datos dinámicos
-const metricas = [
-  { title: 'Reconocimientos totales', icon: Activity, percentage: 90 },
-  { title: 'Precisión del Modelo', icon: Target, percentage: '45.0%' },
-  { title: 'F1-Score', icon: TrendingUp, percentage: '26.7%' },
-]
-
 const counts = ref({ morchella: 20, no_morchella: 70 }) // default
+// Datos dinámicos
+const metricas = computed(() => [
+  {
+    title: 'Reconocimientos totales',
+    icon: Activity,
+    percentage: (counts.value?.morchella || 0) + (counts.value?.no_morchella || 0)
+  }
+  //{ title: 'Precisión del Modelo', icon: Target, percentage: '45.0%' },
+  //{ title: 'F1-Score', icon: TrendingUp, percentage: '26.7%' },
+])
 onMounted(async () => {
   try {
     // Usamos el proxy de Vite -> /api/* => http://localhost:5000/*
@@ -36,14 +39,15 @@ onMounted(async () => {
       <div class="bg-white p-10 pt-12 rounded-xl border border-gray-200 shadow-lg w-full max-w-4xl overflow-visible">
         <h2 class="text-center text-xl font-bold text-gold-900 mb-6">Resumen del Sistema</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start mb-6">
+<!--       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start mb-6"> --> 
           <div v-for="metrica in metricas" :key="metrica.title" class="metric-wrapper">
             <TextBox class="w-full h-full" :title="metrica.title" :icon="metrica.icon" :percentage="metrica.percentage" />
           </div>
-        </div>
+
+      <!--   </div>--> 
 
         <div class="mt-6 text-gold-900">
-          <ConfusionMatrix :counts="counts" />
+          <!----><ConfusionMatrix :counts="counts" />
         </div>
       </div>
     </div>

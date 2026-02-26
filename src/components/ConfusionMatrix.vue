@@ -78,47 +78,18 @@ watch(() => toRaw(props.counts), (nv) => {
 </script>
 
 <template>
+
+  
   <!-- HTML del componente -->
   <div class="space-y-6">
     <!-- Matriz de Confusión -->
     <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+     <!--
+
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Matriz de Confusión</h3>
+  -->
 
-      <div class="grid md:grid-cols-2 gap-4 mb-6">
-        <!-- mantengo los contadores visuales usando props -->
-        <div class="flex justify-between items-center">
-          <div class="flex flex-col">
-            <span class="text-gray-700">Verdaderos Positivos:</span>
-            <span class="text-gray-500">Morchella +70% confianza</span>
-          </div>
-          <span class="text-gray-900 font-medium">{{ counts.morchella_true || 0 }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex flex-col">
-            <span class="text-gray-700">Falsos Positivos:</span>
-            <span class="text-gray-500">Morchella -70% confianza</span>
-          </div>
-          <span class="text-gray-900 font-medium">{{ counts.false_positive || 0 }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex flex-col">
-            <span class="text-gray-700">Falsos Negativos:</span>
-            <span class="text-gray-500">No Morchella -70% confianza</span>
-          </div>
-          <div class="bg-black text-white px-3 py-1 rounded text-sm font-medium">{{ counts.false_negative || 0 }}</div>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex flex-col">
-            <span class="text-gray-700">Verdaderos Negativos:</span>
-            <span class="text-gray-500">No Morchella +70% confianza</span>
-          </div>
-          <div class="bg-red-500 text-white px-3 py-1 rounded text-sm font-medium">{{ counts.no_morchella_true || 0 }}</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Distribución de Reconocimientos con Pie Chart -->
+   <!-- Distribución de Reconocimientos con Pie Chart -->
     <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución de Reconocimientos</h3>
 
@@ -150,6 +121,47 @@ watch(() => toRaw(props.counts), (nv) => {
       </div>
     </div>
   </div>
+      
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <!-- mantengo los contadores visuales usando props -->
+      <!--   
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col">
+            <span class="text-gray-700">Verdaderos Positivos:</span>
+            <span class="text-gray-500">Morchella +70% confianza</span>
+          </div>
+          <span class="text-gray-900 font-medium">{{ counts.morchella_true || 0 }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col">
+            <span class="text-gray-700">Falsos Positivos:</span>
+            <span class="text-gray-500">Morchella -70% confianza</span>
+          </div>
+          <span class="text-gray-900 font-medium">{{ counts.false_positive || 0 }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col">
+            <span class="text-gray-700">Falsos Negativos:</span>
+            <span class="text-gray-500">No Morchella -70% confianza</span>
+          </div>
+          <div class="bg-black text-white px-3 py-1 rounded text-sm font-medium">{{ counts.false_negative || 0 }}</div>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col">
+            <span class="text-gray-700">Verdaderos Negativos:</span>
+            <span class="text-gray-500">No Morchella +70% confianza</span>
+          </div>
+          <div class="bg-red-500 text-white px-3 py-1 rounded text-sm font-medium">{{ counts.no_morchella_true || 0 }}</div>
+        </div>
+        a
+
+        -->
+      </div>
+
+      
+    </div>
+
+   
 </template>
 
 <style scoped>

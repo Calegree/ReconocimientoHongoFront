@@ -19,13 +19,17 @@ const props = defineProps({
 
 <template>
   <!-- HTML del componente -->
-  <div class="mt-4 mb-4 flex flex-col mx-auto p-6 w-80 h-32 border border-gray-200 rounded-lg">
-    <div class="flex justify-between items-start mb-4">
+  <div class="mt-4 mb-4 flex flex-col items-center mx-auto p-6 w-80 h-32 border border-gray-200 rounded-lg">
+   <div class="flex justify-between items-start mb-4">
       <p class="font-bold">{{ title }}</p>
       <!-- Usa directamente el icono pasado como prop -->
-      <component :is="icon" class="w-6 h-6 ml-auto text-gray-400" />
+       <div class="">
+      <!--   <component :is="icon" class="w-6 h-6 ml-auto text-gray-400" />  -->
+       </div>
+     
     </div>
 
     <p class="text-3xl font-bold">{{ percentage }}</p>
   </div>
 </template>
+flex-1 flex items-center justify-center 

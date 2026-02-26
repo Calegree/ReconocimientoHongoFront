@@ -1,4 +1,4 @@
-# Morchelapp (develop)
+# Morchelapp Administración
 
 Frontend de administración del sistema de reconocimiento de hongos. Esta rama contiene la versión de desarrollo lista para pruebas e integración.
 
